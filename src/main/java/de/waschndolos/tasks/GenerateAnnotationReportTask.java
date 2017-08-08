@@ -32,10 +32,10 @@ public class GenerateAnnotationReportTask extends DefaultTask {
     String annotationClass;
 
     @Input
-    String outputFormat;
+    String outputFormat = "markdown";
 
     @Input
-    String destination;
+    String destination = getProject().getBuildDir().getPath();
 
     @Override
     public String getGroup() {
