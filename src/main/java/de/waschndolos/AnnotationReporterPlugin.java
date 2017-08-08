@@ -10,12 +10,6 @@ import java.util.Set;
 
 public class AnnotationReporterPlugin implements Plugin<Project> {
 
-    @Input
-    Set<File> sources;
-
-    @Input
-    String annotationClass;
-
     @Override
     public void apply(Project project) {
 
