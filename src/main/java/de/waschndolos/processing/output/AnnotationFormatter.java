@@ -3,8 +3,6 @@ package de.waschndolos.processing.output;
 import de.waschndolos.model.AnnotationInfo;
 import de.waschndolos.processing.exception.ReportCreationException;
 
-import java.io.File;
-import java.io.File;
 import java.util.List;
 
 /**
