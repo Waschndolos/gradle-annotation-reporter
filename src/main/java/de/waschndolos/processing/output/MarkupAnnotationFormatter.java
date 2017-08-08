@@ -2,6 +2,7 @@ package de.waschndolos.processing.output;
 
 import de.waschndolos.model.AnnotationInfo;
 import de.waschndolos.processing.exception.ReportCreationException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,22 +16,39 @@ import java.util.Set;
 public class MarkupAnnotationFormatter implements AnnotationFormatter {
 
 
+    private static final String CLASS_NAME = "ClassName";
+
     @Override
-    public void createReport(List<AnnotationInfo> annotationInfos, String destinationPath) throws ReportCreationException {
-        File report = new File(destinationPath + "/report.md");
-        if (!report.exists()) {
-            try {
-                report.createNewFile();
-            } catch (IOException e) {
-                throw new ReportCreationException("Unable to create File " + destinationPath, e);
-            }
-        }
+    public String getOutputFormat() {
+        return OutputFormats.MARKDOWN.getFormatString();
+    }
+
+    @Override
+    public void createReport(List<AnnotationInfo> annotationInfoList, String destinationPath) throws ReportCreationException {
+        File report = getConfiguredOutputFile(destinationPath);
 
         StringBuffer markdownString = new StringBuffer();
-        markdownString.append("ClassName").append("|");
-        Set<String> headings = annotationInfos.get(0).getAnnotationFields().keySet();
+
+        createTableHeader(annotationInfoList, markdownString);
+
+        createTableContent(annotationInfoList, markdownString);
+
+        try (BufferedWriter writer = Files.newBufferedWriter(report.toPath())) {
+
+            writer.write(markdownString.toString());
+        } catch (IOException e) {
+            throw new ReportCreationException("Unable to write to file " + report, e);
+        }
+
+    }
+
+    private void createTableHeader(List<AnnotationInfo> annotationInfoList, StringBuffer markdownString) {
+
+        markdownString.append(CLASS_NAME).append("|");
+
+        Set<String> headings = annotationInfoList.get(0).getAnnotationFields().keySet();
         Set<Integer> headerSizes = new HashSet<>();
-        headerSizes.add("ClassName".length());
+        headerSizes.add(CLASS_NAME.length());
         for (String heading : headings) {
             markdownString.append(heading).append("|");
             headerSizes.add(heading.length());
@@ -47,10 +65,11 @@ public class MarkupAnnotationFormatter implements AnnotationFormatter {
             markdownString.append("|");
         }
 
-        // remove last |
         removeLastPipe(markdownString);
+    }
 
-        for (AnnotationInfo annotationInfo : annotationInfos) {
+    private void createTableContent(List<AnnotationInfo> annotationInfoList, StringBuffer markdownString) {
+        for (AnnotationInfo annotationInfo : annotationInfoList) {
             markdownString.append("\n");
 
             String className = annotationInfo.getClassName();
@@ -62,22 +81,23 @@ public class MarkupAnnotationFormatter implements AnnotationFormatter {
             }
             removeLastPipe(markdownString);
         }
+    }
 
-        try (BufferedWriter writer = Files.newBufferedWriter(report.toPath())) {
-
-            writer.write(markdownString.toString());
-        } catch (IOException e) {
-            throw new ReportCreationException("Unable to write to file " + report, e);
+    private File getConfiguredOutputFile(String destinationPath) throws ReportCreationException {
+        File report = new File(StringUtils.appendIfMissing(destinationPath, "/") + "report.md");
+        if (!report.exists()) {
+            try {
+                report.createNewFile();
+            } catch (IOException e) {
+                throw new ReportCreationException("Unable to create File " + destinationPath, e);
+            }
         }
-
+        return report;
     }
 
     private void removeLastPipe(StringBuffer markdownString) {
         markdownString.deleteCharAt(markdownString.length() - 1);
     }
 
-    @Override
-    public String getOutputFormat() {
-        return "markup";
-    }
+
 }
