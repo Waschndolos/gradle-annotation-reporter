@@ -1,9 +1,5 @@
 package de.waschndolos.processing.output;
 
-import de.waschndolos.model.AnnotationInfo;
-import de.waschndolos.processing.exception.ReportCreationException;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+
+import de.waschndolos.model.AnnotationInfo;
+import de.waschndolos.processing.exception.ReportCreationException;
 
 public class MarkupAnnotationFormatter implements AnnotationFormatter {
 

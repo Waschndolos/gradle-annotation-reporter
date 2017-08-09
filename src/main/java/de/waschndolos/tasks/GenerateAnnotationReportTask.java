@@ -1,17 +1,8 @@
 package de.waschndolos.tasks;
 
-import de.waschndolos.model.AnnotationInfo;
-import de.waschndolos.processing.AnnotationStringParser;
-import de.waschndolos.processing.exception.ReportCreationException;
-import de.waschndolos.processing.output.ReportContext;
-import org.gradle.api.DefaultTask;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.TaskAction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,12 +12,25 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.gradle.api.DefaultTask;
+import org.gradle.api.Project;
+import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.TaskAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.waschndolos.model.AnnotationInfo;
+import de.waschndolos.processing.AnnotationStringParser;
+import de.waschndolos.processing.exception.ReportCreationException;
+import de.waschndolos.processing.output.ReportContext;
+
 public class GenerateAnnotationReportTask extends DefaultTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenerateAnnotationReportTask.class);
 
     @Input
-    Set<File> sources;
+    Set<Project> projects;
 
     @Input
     String annotationClass;
@@ -45,12 +49,14 @@ public class GenerateAnnotationReportTask extends DefaultTask {
     @TaskAction
     public void executeTask() {
 
+        Set<File> sources = collectSources();
+
         LOGGER.debug("Searching in {} source directories.", sources.size());
 
-        Set<Path> sources = new HashSet<>();
-        for (File srcDir : this.sources) {
+        Set<Path> sourcePathList = new HashSet<>();
+        for (File srcDir : sources) {
             try {
-                sources.addAll(Files.walk(srcDir.toPath())
+                sourcePathList.addAll(Files.walk(srcDir.toPath())
                         .filter(Files::isRegularFile)
                         .filter(path -> path.toString().endsWith(".java"))
                         .collect(Collectors.toList()));
@@ -59,10 +65,10 @@ public class GenerateAnnotationReportTask extends DefaultTask {
             }
         }
 
-        sources.forEach(path -> LOGGER.debug("Collected source file {}", path));
+        sourcePathList.forEach(path -> LOGGER.debug("Collected source file {}", path));
 
         List<AnnotationInfo> annotationInfo = new ArrayList<>();
-        for (Path sourceFile : sources) {
+        for (Path sourceFile : sourcePathList) {
             annotationInfo.addAll(createAnnotationInfo(sourceFile));
         }
 
@@ -76,10 +82,25 @@ public class GenerateAnnotationReportTask extends DefaultTask {
 
     }
 
+    private Set<File> collectSources() {
+        Set<File> sourceFiles = new HashSet<>();
+
+        for (Project p : projects) {
+            if (p.getPlugins().hasPlugin("java")) {
+                JavaPluginConvention javaConvention = p.getConvention().getPlugin(JavaPluginConvention.class);
+                LOGGER.info("Collecting from project {}", p.getName());
+                javaConvention.getSourceSets().stream().forEach(sourceSet -> sourceFiles.addAll(sourceSet.getAllJava().getFiles()));
+            }
+        }
+        return sourceFiles;
+    }
+
     private List<AnnotationInfo> createAnnotationInfo(Path sourceFile) {
 
+        LOGGER.info("Processing now source file: {}", sourceFile);
+
         List<AnnotationInfo> annotationInfos = new ArrayList<>();
-        try(Stream<String> stream  = Files.lines(sourceFile)) {
+        try(Stream<String> stream  = Files.lines(sourceFile,  Charset.forName("Cp1252"))) {
 
             List<String> candidates = stream
                     .filter(line -> line.contains("@" + annotationClass))

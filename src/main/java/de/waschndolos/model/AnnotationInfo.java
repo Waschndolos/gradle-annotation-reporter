@@ -1,12 +1,13 @@
 package de.waschndolos.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class AnnotationInfo {
 
     private String className;
 
-    private Map<String, String> annotationFields;
+    private Map<String, String> annotationFields = new HashMap<>();
 
     public AnnotationInfo(String className) {
         this.className = className;
