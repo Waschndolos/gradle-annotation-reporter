@@ -85,15 +85,19 @@ public class MarkupAnnotationFormatter implements AnnotationFormatter {
     }
 
     private File getConfiguredOutputFile(String destinationPath, String annotationClassName) throws ReportCreationException {
-        File report = new File(StringUtils.appendIfMissing(destinationPath, "/") + annotationClassName + ".md");
-        if (!report.exists()) {
+        File targetFile = new File(StringUtils.appendIfMissing(destinationPath, "\\") , annotationClassName + ".md");
+        if (!targetFile.exists()) {
             try {
-                report.createNewFile();
+                File parentFile = targetFile.getParentFile();
+                if (!parentFile.exists() && !parentFile.mkdirs()) {
+                    throw new ReportCreationException("Unable to create Folder structure for path " + StringUtils.appendIfMissing(destinationPath, "/") + annotationClassName + ".md");
+                }
+                targetFile.createNewFile();
             } catch (IOException e) {
-                throw new ReportCreationException("Unable to create File " + destinationPath, e);
+                throw new ReportCreationException("Unable to create File " + StringUtils.appendIfMissing(destinationPath, "/") + annotationClassName + ".md", e);
             }
         }
-        return report;
+        return targetFile;
     }
 
     private void removeLastPipe(StringBuffer markdownString) {
