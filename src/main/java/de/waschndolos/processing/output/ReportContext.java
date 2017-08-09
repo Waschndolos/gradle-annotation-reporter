@@ -11,11 +11,11 @@ public class ReportContext {
 
     private List<AnnotationFormatter> annotationFormatter;
 
-    public void createReport(String outputFormat, List<AnnotationInfo> annotationInfos, String destinationPath) throws ReportCreationException {
+    public void createReport(String outputFormat, List<AnnotationInfo> annotationInfos, String destinationPath, String annotationClassName) throws ReportCreationException {
 
         AnnotationFormatter formatter = getResponsibleAnnotationFormatter(outputFormat);
 
-        formatter.createReport(annotationInfos, destinationPath);
+        formatter.createReport(annotationInfos, destinationPath, annotationClassName);
     }
 
     private AnnotationFormatter getResponsibleAnnotationFormatter(String outputFormat) throws ReportCreationException {

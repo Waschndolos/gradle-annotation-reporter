@@ -75,7 +75,7 @@ public class GenerateAnnotationReportTask extends DefaultTask {
         ReportContext reportContext = new ReportContext();
 
         try {
-            reportContext.createReport(outputFormat, annotationInfo, destination);
+            reportContext.createReport(outputFormat, annotationInfo, destination, annotationClass);
         } catch (ReportCreationException e) {
             LOGGER.error("Unable to create Report.", e);
         }

@@ -25,8 +25,8 @@ public class MarkupAnnotationFormatter implements AnnotationFormatter {
     }
 
     @Override
-    public void createReport(List<AnnotationInfo> annotationInfoList, String destinationPath) throws ReportCreationException {
-        File report = getConfiguredOutputFile(destinationPath);
+    public void createReport(List<AnnotationInfo> annotationInfoList, String destinationPath, String annotationClassName) throws ReportCreationException {
+        File report = getConfiguredOutputFile(destinationPath, annotationClassName);
 
         StringBuffer markdownString = new StringBuffer();
 
@@ -84,8 +84,8 @@ public class MarkupAnnotationFormatter implements AnnotationFormatter {
         }
     }
 
-    private File getConfiguredOutputFile(String destinationPath) throws ReportCreationException {
-        File report = new File(StringUtils.appendIfMissing(destinationPath, "/") + "report.md");
+    private File getConfiguredOutputFile(String destinationPath, String annotationClassName) throws ReportCreationException {
+        File report = new File(StringUtils.appendIfMissing(destinationPath, "/") + annotationClassName + ".md");
         if (!report.exists()) {
             try {
                 report.createNewFile();
