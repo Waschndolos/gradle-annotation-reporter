@@ -8,10 +8,9 @@ This can be necessary when you e.g. have a custom annotation and you want to cre
 ## Configuration
     
     task createMarkdownReport(type: de.waschndolos.tasks.GenerateAnnotationReportTask) {
-        sources = sourceSets.alLJava.srcDirs
-        annotationClass = de.example.MyCustomAnnotation
-        outputFormat = markdown
-        destination = C:\\myReportFolder
+        projects = project.subprojects.asList()
+        annotationClass = 'Refactor'
     }
+
     
 ## -- Under Construction --
